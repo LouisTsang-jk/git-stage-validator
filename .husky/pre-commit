@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+npm run pre-commit
+result=$?
+# echo "hello: $result"
+# exit 99/
+# echo "The application exited with code $exit_code"

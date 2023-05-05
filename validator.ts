@@ -1,15 +1,26 @@
-import inquirer from "inquirer";
+// TODO 大小写敏感
+import { confirm } from "@inquirer/prompts";
 import { spawnSync } from "child_process";
+import chalk from "chalk";
+
+enum ValidatorType {
+  forbid,
+  confirm,
+}
 
 interface Validator {
   name: string;
-  type: "forbid" | "confirm";
+  type: keyof typeof ValidatorType;
   regex: RegExp;
   msg: string;
-  files: `*.${string}`[];
+  files: (`*.${string}` | `*`)[];
 }
 
-const CONFIRM_TIP = "(y-yes、n-no、s-skip)";
+interface ValidatorResult {
+  validator: string;
+  path: string;
+  msg: string;
+}
 
 const validators: Validator[] = [
   {
@@ -33,12 +44,14 @@ const validators: Validator[] = [
     msg: `检测到提交的ts文件中有"console.log"`,
     files: ["*.ts", "*.js"],
   },
+  {
+    name: "debugger",
+    type: "confirm",
+    regex: /debugger/,
+    msg: `检测到提交的ts文件中有"debugger"`,
+    files: ["*.ts"],
+  },
 ];
-
-const commandArgs = ["diff", "--cached"];
-const commandOptions = ["--diff-filter=A", "--diff-filter=M"];
-
-const [A, M] = commandOptions.map((option) => [...commandArgs, option]);
 
 const DIFF_COMMAND = ["diff", "--diff-filter=AM", "--cached"];
 
@@ -52,65 +65,54 @@ const filePaths = filenameRaw
   .split("\n")
   .filter((i) => i);
 
-const table: any[] = [];
+const forbidValidResult: ValidatorResult[] = [];
+const confirmValidResult: ValidatorResult[] = [];
+
 for (const validator of validators) {
   for (const wildcard of validator.files) {
     for (const path of filePaths) {
       const reg = new RegExp(`.+\.${wildcard.replace(/\.(.+)$/, "$1")}$`);
       const isMatch = reg.test(path);
-      isMatch && table.push({
-        'validator': validator.name, path, 'msg': validator.msg
-      });
       if (isMatch) {
+        const target =
+          validator.type === "forbid" ? forbidValidResult : confirmValidResult;
         const { stdout: fileRaw } = spawnSync("git", [...DIFF_COMMAND, path]);
-        const file = fileRaw.toString()
+        const file = fileRaw.toString();
         const matchUpdateContent = /^\+([^\+][^\+].+)/gm;
-        const matches = [
-          ...`${file}`.matchAll(matchUpdateContent),
-        ];
+        const matches = [...`${file}`.matchAll(matchUpdateContent)];
         const diffRow = matches.map((i) => i?.[1] || "");
         for (const diff of diffRow) {
           if (validator.regex.test(diff)) {
-            // console.log(`匹配到:${validator.name}，请检查文件:${path}`)
-            // TODO table push
-            // TODO ignore duplicate validator in same file
+            validator.regex.lastIndex = 0;
+            target.push({
+              validator: validator.name,
+              path,
+              msg: diff,
+            });
           }
         }
-        break
       }
     }
   }
 }
 
-console.table(table);
+if (confirmValidResult.length) {
+  console.info(
+    chalk.bgYellowBright("提交的代码中含需要二次确认才能提交的内容：")
+  );
+  console.table(confirmValidResult, ["validator", "path", "msg"]);
+}
 
-process.exit();
+if (forbidValidResult.length) {
+  console.info(chalk.bgRedBright("提交的代码中含有禁止提交的内容："));
+  console.table(forbidValidResult, ["validator", "path", "msg"]);
+  console.info(chalk.bgRedBright("请修改之后再次提交"));
+  process.exit(1);
+}
 
-const { stdout: childA } = spawnSync("git", A);
-const { stdout: childM } = spawnSync("git", M);
-
-const matchDiffResultReg = /diff --git/gm;
-
-const matchUpdateContent = /^\+([^\+][^\+].+)/gm;
-
-console.log("start:A", childA.toString());
-console.log("start:M", childM.toString());
-const matches = [
-  ...`${childA.toString()}${childM.toString()}`.matchAll(matchUpdateContent),
-];
-const diff = matches.map((i) => i?.[1] || "");
-// console.log('diff', diff);
-
-// childA.stdout.on("data", (data: Buffer) => {
-//   const output = data.toString();
-//   console.log("stdout:", output);
-//   if (!output.match(matchDiffResultReg)) return;
-//   const matches = [...output.matchAll(matchUpdateContent)];
-//   if (!matches) return;
-// });
-
-// childA.stderr.on("data", (data) => {
-//   console.log("err:", data.toString());
-// });
-
-console.log("end");
+if (!forbidValidResult.length && confirmValidResult.length) {
+  const answer = await confirm({
+    message: "提交的代码中含需要二次确认才能提交的内容，确认现在需要提交？\n",
+  });
+  process.exit(+!answer);
+}
