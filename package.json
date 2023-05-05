@@ -5,8 +5,7 @@
   "type": "module",
   "main": "check.js",
   "scripts": {
-    "start": "node confirm.js",
-    "pre-commit": "ts-node validator.ts < /dev/tty",
+    "pre-commit": "ts-node ./src/index.ts < /dev/tty",
     "test": ". test/init.sh",
     "prepare": "husky install"
   },

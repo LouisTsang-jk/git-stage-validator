@@ -1,57 +1,13 @@
-// TODO 大小写敏感
 import { confirm } from "@inquirer/prompts";
 import { spawnSync } from "child_process";
 import chalk from "chalk";
+import { ValidatorResult } from "./types.js";
+import { validators } from "./validator.js";
+import { cpus } from 'os'
 
-enum ValidatorType {
-  forbid,
-  confirm,
-}
+console.log('cpus', cpus().length)
 
-interface Validator {
-  name: string;
-  type: keyof typeof ValidatorType;
-  regex: RegExp;
-  msg: string;
-  files: (`*.${string}` | `*`)[];
-}
-
-interface ValidatorResult {
-  validator: string;
-  path: string;
-  msg: string;
-}
-
-const validators: Validator[] = [
-  {
-    name: "JSON.stringify",
-    type: "confirm",
-    regex: /JSON\.stringify/,
-    msg: `检测到提交的html文件中有"JSON.stringify"`,
-    files: ["*.html"],
-  },
-  {
-    name: "| json",
-    type: "confirm",
-    regex: /\| json/,
-    msg: `检测到提交的ts文件中有"* | json"`,
-    files: ["*.html"],
-  },
-  {
-    name: "console.log",
-    type: "confirm",
-    regex: /console\.log/,
-    msg: `检测到提交的ts文件中有"console.log"`,
-    files: ["*.ts", "*.js"],
-  },
-  {
-    name: "debugger",
-    type: "confirm",
-    regex: /debugger/,
-    msg: `检测到提交的ts文件中有"debugger"`,
-    files: ["*.ts"],
-  },
-];
+console.time()
 
 const DIFF_COMMAND = ["diff", "--diff-filter=AM", "--cached"];
 
@@ -107,6 +63,7 @@ if (forbidValidResult.length) {
   console.info(chalk.bgRedBright("提交的代码中含有禁止提交的内容："));
   console.table(forbidValidResult, ["validator", "path", "msg"]);
   console.info(chalk.bgRedBright("请修改之后再次提交"));
+  console.timeEnd()
   process.exit(1);
 }
 
@@ -114,5 +71,6 @@ if (!forbidValidResult.length && confirmValidResult.length) {
   const answer = await confirm({
     message: "提交的代码中含需要二次确认才能提交的内容，确认现在需要提交？\n",
   });
+  console.timeEnd()
   process.exit(+!answer);
 }
