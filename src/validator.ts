@@ -34,22 +34,21 @@ export const validators: ValidatorRule[] = [
 interface ValidateInfo {
   rule: ValidatorRule;
   pathname: string;
-  wildcards: string[];
   raw: string;
 }
 
 class Validator {
-  next!: Validator;
-  constructor(next: Validator) {
+  next: Validator | null = null
+  constructor(next: Validator | null) {
     this.next = next;
   }
-  async validate(data: ValidateInfo): Promise<boolean> {
-    return false;
+  validate = (data: ValidateInfo): Promise<boolean> | boolean => {
+    return Promise.resolve(false);
   }
 }
 
 export class FilenameExtensionValidator extends Validator {
-  override async validate(data: ValidateInfo) {
+  override validate = async (data: ValidateInfo) => {
     const { rule, pathname } = data;
     const { files: wildcards } = rule
     const wildcardList = wildcards.map((wildcard) =>
@@ -63,10 +62,12 @@ export class FilenameExtensionValidator extends Validator {
 }
 
 export class FileRawValidator extends Validator {
-  override async validate(data: ValidateInfo) {
+  override validate = (data: ValidateInfo) => {
     const { rule, raw } = data;
     const { regex } = rule
     const isMatch = regex.test(raw);
+    regex.lastIndex = 0
+    // TODO Throw Match Msg
     if (!isMatch) return false;
     return this.next ? this.next.validate(data) : true;
   }
