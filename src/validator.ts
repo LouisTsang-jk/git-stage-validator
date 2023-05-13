@@ -4,7 +4,7 @@ export const validators: ValidatorRule[] = [
   {
     name: "JSON.stringify",
     type: "confirm",
-    regex: /JSON\.stringify/,
+    regex: /JSON\.stringify\(.+\)/,
     msg: `检测到提交的html文件中有"JSON.stringify"`,
     files: ["*.html"],
   },
@@ -18,7 +18,7 @@ export const validators: ValidatorRule[] = [
   {
     name: "console.log",
     type: "confirm",
-    regex: /console\.log/,
+    regex: /console\.log\(.+\)/,
     msg: `检测到提交的ts文件中有"console.log"`,
     files: ["*.ts", "*.js"],
   },
@@ -38,37 +38,41 @@ interface ValidateInfo {
 }
 
 class Validator {
-  next: Validator | null = null
+  next: Validator | null = null;
+  public validInfo = new Map<string, string>();
   constructor(next: Validator | null) {
     this.next = next;
+    if (this.next) {
+      this.next.validInfo = this.validInfo
+    }
   }
   validate = (data: ValidateInfo): Promise<boolean> | boolean => {
     return Promise.resolve(false);
-  }
+  };
 }
 
 export class FilenameExtensionValidator extends Validator {
   override validate = async (data: ValidateInfo) => {
     const { rule, pathname } = data;
-    const { files: wildcards } = rule
+    const { files: wildcards } = rule;
     const wildcardList = wildcards.map((wildcard) =>
       wildcard.replace(/\*\.(.+)$/, "$1")
     );
     const regex = new RegExp(`.+\.(${wildcardList.join("|")})$`);
-    const isMatch = regex.test(pathname);
-    if (!isMatch) return false;
+    const matches = pathname.match(regex)
+    if (!matches) return false;
+    this.validInfo.set('fileExtension', matches?.[0])
     return this.next ? this.next.validate(data) : true;
-  }
+  };
 }
 
 export class FileRawValidator extends Validator {
   override validate = (data: ValidateInfo) => {
     const { rule, raw } = data;
-    const { regex } = rule
-    const isMatch = regex.test(raw);
-    regex.lastIndex = 0
-    // TODO Throw Match Msg
-    if (!isMatch) return false;
+    const { regex } = rule;
+    const matches = raw.match(regex)
+    if (!matches) return false;
+    this.validInfo.set('fileRaw', matches?.[0])
     return this.next ? this.next.validate(data) : true;
-  }
+  };
 }

@@ -5,6 +5,7 @@ import {
   FilenameExtensionValidator,
   validators,
 } from "./validator.js";
+import { ThreadResult, ValidMsg, ValidatorRule } from "./types.js";
 
 const DIFF_COMMAND = ["diff", "--diff-filter=AM", "--cached"];
 
@@ -18,29 +19,28 @@ const file = fileRaw.toString();
 const matchUpdateContent = /^\+([^\+][^\+].+)/gm;
 const matches = [...`${file}`.matchAll(matchUpdateContent)];
 const diff = matches.map((i) => i?.[1] || "").join("\n");
-const validator = new FilenameExtensionValidator(new FileRawValidator(null))
-  .validate;
-const validMsg: {
-  validator: string;
-  path: string;
-  msg: string;
-}[] = [];
+const validator = new FilenameExtensionValidator(new FileRawValidator(null));
+const validMsg: ValidMsg[] = [];
+
 validators.forEach(async (rule) => {
-  const invalid = await validator({
+  const invalid = await validator.validate({
     rule,
     pathname: path,
     raw: diff,
   });
   if (invalid) {
     validMsg.push({
-      validator: rule.name,
+      validator: rule,
       path,
-      msg: rule.msg,
+      msg: validator.validInfo.get('fileRaw'),
     });
   }
 });
-// FIXME just debug
-setTimeout(() => {
-  debugger;
-  parentPort?.postMessage({ diff, threadId, validMsg });
-}, 2000);
+
+process.nextTick(() => {
+  const msg: ThreadResult = { 
+    threadId,
+    validMsg
+  }
+  parentPort?.postMessage(msg);
+})

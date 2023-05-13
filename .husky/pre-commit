@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-npm run pre-commit
+npm run next
 result=$?
 # echo "hello: $result"
 # exit 99/

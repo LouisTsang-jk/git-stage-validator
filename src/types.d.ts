@@ -16,3 +16,15 @@ export interface ValidatorResult {
   path: string;
   msg: string;
 }
+
+export interface ValidMsg {
+  validator: ValidatorRule;
+  path: string;
+  msg?: string;
+}
+
+export interface ThreadResult {
+  // diff: string
+  threadId: number
+  validMsg: ValidMsg[]
+}

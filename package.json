@@ -5,7 +5,8 @@
   "type": "module",
   "main": "check.js",
   "scripts": {
-    "pre-commit": "node --no-warnings --loader @swc-node/register/esm ./src/index.ts < /dev/tty",
+    "next": "node --no-warnings --loader @swc-node/register/esm ./src/index.ts < /dev/tty",
+    "legacy": "node --no-warnings --loader @swc-node/register/esm ./src/index.old.ts < /dev/tty",
     "dev": "node --loader @swc-node/register/esm ./src/index.old.ts < /dev/tty",
     "test": ". test/init.sh",
     "prepare": "husky install"
