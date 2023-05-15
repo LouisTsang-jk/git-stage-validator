@@ -1,6 +1,6 @@
 import { ValidatorRule } from "./types.js";
 
-export const validators: ValidatorRule[] = [
+export const validators = [
   {
     name: "JSON.stringify",
     type: "confirm",
@@ -29,7 +29,7 @@ export const validators: ValidatorRule[] = [
     msg: `检测到提交的ts文件中有"debugger"`,
     files: ["*.ts"],
   },
-];
+] as ValidatorRule[];
 
 interface ValidateInfo {
   rule: ValidatorRule;

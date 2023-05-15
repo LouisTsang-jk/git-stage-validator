@@ -1,6 +1,6 @@
 {
-  "name": "commit-safe",
-  "version": "1.0.0",
+  "name": "git-stage-validator",
+  "version": "0.0.1",
   "description": "",
   "type": "module",
   "main": "check.js",

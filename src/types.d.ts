@@ -24,7 +24,12 @@ export interface ValidMsg {
 }
 
 export interface ThreadResult {
-  // diff: string
   threadId: number
   validMsg: ValidMsg[]
+}
+
+export interface ThreadData {
+  threadId: number
+  path: string
+  validators: ValidatorRule[]
 }

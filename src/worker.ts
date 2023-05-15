@@ -2,14 +2,13 @@ import { spawnSync } from "child_process";
 import { parentPort, workerData } from "worker_threads";
 import {
   FileRawValidator,
-  FilenameExtensionValidator,
-  validators,
+  FilenameExtensionValidator
 } from "./validator.js";
-import { ThreadResult, ValidMsg, ValidatorRule } from "./types.js";
+import { ThreadData, ThreadResult, ValidMsg, ValidatorRule } from "./types.js";
 
 const DIFF_COMMAND = ["diff", "--diff-filter=AM", "--cached"];
 
-const { path, regex, threadId } = workerData;
+const { path, validators, threadId } = workerData as ThreadData;
 
 const { stdout: fileRaw } = spawnSync("git", [
   ...DIFF_COMMAND,

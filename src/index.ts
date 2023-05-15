@@ -1,3 +1,5 @@
+import url from 'url'
+import path from 'path'
 import { confirm } from "@inquirer/prompts";
 import { spawnSync } from "child_process";
 import chalk from "chalk";
@@ -5,9 +7,9 @@ import { ThreadResult, ValidatorResult } from "./types.js";
 import { cpus } from "os";
 import { Worker } from "worker_threads";
 import { pool } from "./pool.js";
+import { validators } from './validator.js';
 
-const MAX_THREAD = cpus().length * 2;
-const THREAD_THRESHOLD = 2;
+const MAX_THREAD = cpus().length;
 
 console.time();
 
@@ -24,15 +26,21 @@ const filePaths = filenameRaw
   .split("\n")
   .filter((i) => i);
 
+const __dirname = url.fileURLToPath(new URL('.', import.meta.url))
+// const RULES_PATH = path.join(__dirname, '.stagerc.ts')
+
+// const validators = await import(RULES_PATH)
+
 const threadPool = pool({
-  concurrency: MAX_THREAD,
+  concurrency: filePaths.length > MAX_THREAD ? MAX_THREAD : filePaths.length,
   tasks: filePaths,
-  fn: (path: string, index: number) => {
-    console.log('path:', path)
-    const worker = new Worker('./src/worker.ts', {
+  fn: (filepath: string, index: number) => {
+    const WORKER_PATH = path.join(__dirname, 'worker.ts')
+    const worker = new Worker(WORKER_PATH, {
       workerData: {
-        path,
-        threadId: index
+        path: filepath,
+        threadId: index,
+        validators
       }
     })
     return new Promise<ThreadResult>((resolve, reject) => {
@@ -44,7 +52,7 @@ const threadPool = pool({
   }
 })
 
-threadPool.then((data: ThreadResult[]) => {})
+threadPool.then((data: ThreadResult[]) => { })
 const data = await threadPool
 const confirmValidResult: ValidatorResult[] = []
 const forbidValidResult: ValidatorResult[] = []
