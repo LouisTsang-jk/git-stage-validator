@@ -1,13 +1,21 @@
+#!/usr/bin/env node --no-warnings --loader @swc-node/register/esm
 import url from 'url'
 import path from 'path'
 import { confirm } from "@inquirer/prompts";
 import { spawnSync } from "child_process";
 import chalk from "chalk";
-import { ThreadResult, ValidatorResult } from "./types.js";
+import { ThreadResult, ValidatorResult } from "./types.d";
 import { cpus } from "os";
 import { Worker } from "worker_threads";
-import { pool } from "./pool.js";
-import { validators } from './validator.js';
+import { pool } from "./pool";
+import { validators } from './validator';
+import { createInterface } from 'readline';
+import process from 'process';
+
+const rl = createInterface({
+  input: process.stdin,
+  output: process.stdout
+}); 
 
 const MAX_THREAD = cpus().length;
 
@@ -85,8 +93,12 @@ if (forbidValidResult.length) {
 
 if (!forbidValidResult.length && confirmValidResult.length) {
   console.timeEnd();
-  const answer = await confirm({
-    message: "提交的代码中含需要二次确认才能提交的内容，确认现在需要提交？\n",
-  });
-  process.exit(+!answer);
+  rl.question('提交的代码中含需要二次确认才能提交的内容，确认现在需要提交？\n', (ans: string) => {
+    const answer = ans.toUpperCase() === 'Y'
+    process.exit(+!answer);
+  })
+  // const answer = await confirm({
+  //   message: "提交的代码中含需要二次确认才能提交的内容，确认现在需要提交？\n",
+  // });
+  // process.exit(+!answer);
 }

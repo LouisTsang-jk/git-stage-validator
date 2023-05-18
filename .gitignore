@@ -1,5 +1,6 @@
 test/.tmp_git_test_repo
 
+lib
 # Logs
 logs
 *.log
