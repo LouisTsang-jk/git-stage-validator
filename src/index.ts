@@ -76,6 +76,12 @@ data.forEach(result => {
   })
 })
 
+console.log('confirmValidResult', confirmValidResult)
+console.log('forbidValidResult', forbidValidResult)
+if (!confirmValidResult.length && !forbidValidResult.length) {
+  process.exit(0)
+}
+
 if (confirmValidResult.length) {
   console.info(
     chalk.bgYellowBright("提交的代码中含需要二次确认才能提交的内容：")
@@ -93,12 +99,9 @@ if (forbidValidResult.length) {
 
 if (!forbidValidResult.length && confirmValidResult.length) {
   console.timeEnd();
-  rl.question('提交的代码中含需要二次确认才能提交的内容，确认现在需要提交？\n', (ans: string) => {
+  console.log('??')
+  rl.question('提交的代码中含需要二次确认才能提交的内容，确认现在需要提交？(Y/n)\n', (ans: string) => {
     const answer = ans.toUpperCase() === 'Y'
     process.exit(+!answer);
   })
-  // const answer = await confirm({
-  //   message: "提交的代码中含需要二次确认才能提交的内容，确认现在需要提交？\n",
-  // });
-  // process.exit(+!answer);
 }
