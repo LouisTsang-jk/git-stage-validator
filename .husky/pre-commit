@@ -3,6 +3,3 @@
 
 npm run next
 result=$?
-# echo "hello: $result"
-# exit 99/
-# echo "The application exited with code $exit_code"
