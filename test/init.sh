@@ -26,8 +26,8 @@ git add .
 
 # vim $TEMP_TEST_PATH/.git/pre-commit
 
-node --no-warnings --loader @swc-node/register/esm ../../src/index.ts < /dev/tty
-# node --no-warnings --loader @swc-node/register/esm ../../src/index.ts < /dev/tty
+node ../../src/index.ts < /dev/tty
+# node ../../src/index.ts < /dev/tty
 
 # Clear Test File
 # rm -rf $TEMP_TEST_PATH
