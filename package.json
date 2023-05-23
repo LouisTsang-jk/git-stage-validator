@@ -10,7 +10,7 @@
     "build": "tsc",
     "watch": "tsc -w",
     "rollup": "rollup -c",
-    "next": "node ./lib/index.js < /dev/tty",
+    "next": "node ./lib/index.js",
     "next:runtime": "node --no-warnings --loader @swc-node/register/esm ./src/index.ts < /dev/tty",
     "legacy": "node --no-warnings --loader @swc-node/register/esm ./src/index.old.ts < /dev/tty",
     "dev": "node --loader @swc-node/register/esm ./src/index.old.ts < /dev/tty",
@@ -36,14 +36,6 @@
     "lint-staged": "^13.2.2",
     "ts-node": "^10.9.1",
     "typescript": "^5.0.4"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
-  "lint-staged": {
-    "*": "check.js"
   },
   "dependencies": {
     "@rollup/plugin-node-resolve": "^15.0.2",

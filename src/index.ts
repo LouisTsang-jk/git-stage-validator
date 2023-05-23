@@ -11,7 +11,17 @@ import { pool } from "./pool.js";
 import { validators as defaultValidators } from './validator.js';
 import { createInterface } from 'readline';
 
-const { default: customValidators } = await import(`${process.cwd()}/stage-validation.js`)
+const CONFIG_FILE = '.stagerc.js'
+
+enum Tips {
+  includesConfirmContent = 'The committed code includes content that requires confirmation before proceeding.',
+  includesForbiddenContent = 'The committed code includes prohibited content. Please make the necessary modifications before resubmitting.',
+  confirmText = 'Confirmation: Do you want to proceed with the submission now? (Y/n)\n'
+}
+
+const { default: customConfig } = await import(`${process.cwd()}/${CONFIG_FILE}`)
+
+const { validators: customValidators, tipsText } = customConfig
 
 const validators: ValidatorRule[] = customValidators || defaultValidators
 
@@ -82,22 +92,21 @@ if (!confirmValidResult.length && !forbidValidResult.length) {
 
 if (confirmValidResult.length) {
   console.info(
-    chalk.bgYellowBright("提交的代码中含需要二次确认才能提交的内容：")
+    chalk.bgYellowBright(tipsText?.includesConfirmContent || Tips.includesConfirmContent)
   );
   console.table(confirmValidResult, ["validator", "path", "msg"]);
 }
 
 if (forbidValidResult.length) {
   console.timeEnd();
-  console.info(chalk.bgRedBright("提交的代码中含有禁止提交的内容："));
+  console.info(chalk.bgRedBright(tipsText?.includesForbiddenContent || Tips.includesForbiddenContent));
   console.table(forbidValidResult, ["validator", "path", "msg"]);
-  console.info(chalk.bgRedBright("请修改之后再次提交"));
   process.exit(1);
 }
 
 if (!forbidValidResult.length && confirmValidResult.length) {
   console.timeEnd();
-  rl.question('提交的代码中含需要二次确认才能提交的内容，确认现在需要提交？(Y/n)\n', (ans: string) => {
+  rl.question(tipsText?.confirmText || Tips.confirmText, (ans: string) => {
     const answer = ans.toUpperCase() === 'Y'
     process.exit(+!answer);
   })
