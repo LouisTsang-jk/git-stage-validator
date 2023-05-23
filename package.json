@@ -4,12 +4,11 @@
   "description": "",
   "type": "module",
   "main": "lib/index.js",
-  "module": "lib/index.mjs",
   "bin": "lib/index.js",
+  "files": ["lib"],
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
-    "rollup": "rollup -c",
     "next": "node ./lib/index.js",
     "next:runtime": "node --no-warnings --loader @swc-node/register/esm ./src/index.ts < /dev/tty",
     "legacy": "node --no-warnings --loader @swc-node/register/esm ./src/index.old.ts < /dev/tty",
@@ -23,7 +22,7 @@
     }
   },
   "keywords": [],
-  "author": "",
+  "author": "LouisTsang",
   "license": "ISC",
   "devDependencies": {
     "@swc-node/register": "^1.6.5",
