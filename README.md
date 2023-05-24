@@ -15,7 +15,6 @@ It is recommended to use husky and the following is an example of using husky fo
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-os_type=$(uname)
 # Windows
 if [[ "$OSTYPE" == "msys" ]]; then
   npx git-stage-validator
