@@ -1,4 +1,9 @@
 # TODO
-1. 时间戳
-2. 全量检测
-3. 
+- Docs
+- Support real wildcard
+- Template file (ESM or CJS)
+- Test unit
+  - valid result
+- Checked status
+- Example
+- Command-line options 
