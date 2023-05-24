@@ -6,6 +6,7 @@ import process from 'process';
 import { spawnSync } from "child_process";
 import { ThreadResult, ValidatorResult, ValidatorRule } from "./types.d";
 import { cpus } from "os";
+import { existsSync, readFileSync, writeFileSync } from 'fs'
 import { Worker } from "worker_threads";
 import { pool } from "./pool.js";
 import { validators as defaultValidators } from './validator.js';
@@ -19,7 +20,18 @@ enum Tips {
   confirmText = 'Confirmation: Do you want to proceed with the submission now? (Y/n)\n'
 }
 
-const { default: customConfig } = await import(`${process.cwd()}/${CONFIG_FILE}`)
+const filePath = `${process.cwd()}/${CONFIG_FILE}`
+
+const __dirname = url.fileURLToPath(new URL('.', import.meta.url))
+
+if (!existsSync(filePath)) {
+  // TODO esm or cjs
+  const templateRaw = readFileSync(path.join(__dirname, './template/.stagerc.cjs'), 'utf8')
+  writeFileSync(filePath, templateRaw, 'utf8')
+}
+
+const { default: customConfig } = await import(filePath)
+
 
 const { validators: customValidators, tipsText } = customConfig
 
@@ -47,7 +59,6 @@ const filePaths = filenameRaw
   .split("\n")
   .filter((i) => i);
 
-const __dirname = url.fileURLToPath(new URL('.', import.meta.url))
 
 const threadPool = pool({
   concurrency: filePaths.length > MAX_THREAD ? MAX_THREAD : filePaths.length,
