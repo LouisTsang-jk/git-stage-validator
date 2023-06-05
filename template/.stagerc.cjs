@@ -1,41 +1,37 @@
 module.exports = {
   tipsText: {
-    includesConfirmContent: "提交的代码中含需要二次确认才能提交的内容：",
-    includesForbiddenContent: "提交的代码中含有禁止提交的内容：",
-    confirmText: "提交的代码中含需要二次确认才能提交的内容，确认现在需要提交？(Y/n)\n"
+    includesConfirmContent: "The committed code includes content that requires secondary confirmation before being committed:",
+    includesForbiddenContent: "The committed code includes forbidden content:",
+    confirmText: "The committed code includes content that requires secondary confirmation. Confirm that you want to proceed with the commit? (Y/n)\n"
   },
   validators: [
     {
       name: "JSON.stringify",
       type: "confirm",
       regex: /JSON\.stringify\(.+\)/,
-      msg: `检测到提交的html文件中有"JSON.stringify"`,
+      msg: `Detected "JSON.stringify" in the committed html file`,
       files: ["*.html"]
     },
     {
       name: "| json",
       type: "confirm",
       regex: /\| json/,
-      msg: `检测到提交的ts文件中有"* | json"`,
+      msg: `Detected "* | json" in the committed ts file`,
       files: ["*.html"]
     },
     {
       name: "console.log",
       type: "confirm",
       regex: /console\.log\(.+\)/,
-      msg: `检测到提交的ts文件中有"console.log"`,
+      msg: `Detected "console.log" in the committed ts file`,
       files: ["*.ts", "*.js"]
     },
     {
       name: "debugger",
       type: "confirm",
       regex: /debugger/,
-      msg: `检测到提交的ts文件中有"debugger"`,
+      msg: `Detected "debugger" in the committed ts file`,
       files: ["*.ts"]
     },
-  ],
-  tips: {
-    confirm: '',
-    forbid: '',
-  }
+  ]
 }
