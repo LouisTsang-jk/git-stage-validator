@@ -55,7 +55,6 @@ export interface ValidatorRule {
 ```
 tipsText: {
   includesConfirmContent: "",
-  includesForbiddenContent: "",
   confirmText: ""
 }
 ```
@@ -70,7 +69,7 @@ export default [
   {
     name: "console.log",
     type: "confirm",
-    regex: /JSON\.stringify\(.+\)/,
+    regex: /console\.log/,
     msg: `Detected 'console.log' in the tsx file being committed.`,
     files: ["*.tsx"]
   }

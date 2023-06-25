@@ -1,9 +1,11 @@
 # TODO
-- Docs
-- Support real wildcard
-- Template file (ESM or CJS)
-- Test unit
-  - valid result
-- Checked status
-- Example
-- Command-line options 
+- [x]Docs
+- [ ] Support real wildcard
+- [ ] Template file (ESM or CJS)
+- [ ] Test unit
+  -  [ ] valid result
+- [ ] Checked status
+- [ ] Example
+- [ ] Command-line options 
+- [ ] Uninstall
+- [ ] The Long Path 

@@ -1,14 +1,17 @@
 {
   "name": "git-stage-validator",
-  "version": "0.0.5",
+  "version": "1.0.0",
   "description": "",
   "type": "module",
-  "main": "lib/index.js",
-  "bin": "lib/index.js",
+  "main": "lib/shell/execute.sh",
+  "bin": {
+    "git-stage-validator": "lib/shell/execute.sh",
+    "git-stage-validator-core": "lib/index.js"
+  },
   "files": ["lib"],
   "scripts": {
-    "build": "tsc && cp -r template/ lib/template/",
-    "watch": "tsc -w && cp -r template/ lib/template/",
+    "build": "tsc && sh shell/build.sh",
+    "watch": "tsc -w && sh shell/build.sh",
     "next": "node ./lib/index.js",
     "legacy": "node ./src/index.old.ts < /dev/tty",
     "test": ". test/init.sh",

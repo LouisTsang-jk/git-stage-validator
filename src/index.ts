@@ -6,32 +6,23 @@ import process from 'process';
 import { spawnSync } from "child_process";
 import { ThreadResult, ValidatorResult, ValidatorRule } from "./types.d";
 import { cpus } from "os";
-import { existsSync, readFileSync, writeFileSync } from 'fs'
 import { Worker } from "worker_threads";
 import { pool } from "./pool.js";
 import { validators as defaultValidators } from './validator.js';
 import { createInterface } from 'readline';
-
-const CONFIG_FILE = '.stagerc.js'
+import { CONFIG_FILE, initialize } from './initialize.js';
 
 enum Tips {
-  includesConfirmContent = 'The committed code includes content that requires confirmation before proceeding.',
-  includesForbiddenContent = 'The committed code includes prohibited content. Please make the necessary modifications before resubmitting.',
-  confirmText = 'Confirmation: Do you want to proceed with the submission now? (Y/n)\n'
+  includesConfirmContent = "Your commit includes content that is validated in .stagerc.cjs. Please check the content of your commit."
 }
 
 const filePath = `${process.cwd()}/${CONFIG_FILE}`
 
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url))
 
-if (!existsSync(filePath)) {
-  // TODO esm or cjs
-  const templateRaw = readFileSync(path.join(__dirname, './template/.stagerc.cjs'), 'utf8')
-  writeFileSync(filePath, templateRaw, 'utf8')
-}
+initialize()
 
 const { default: customConfig } = await import(filePath)
-
 
 const { validators: customValidators, tipsText } = customConfig
 
@@ -76,20 +67,16 @@ const threadPool = pool({
       worker.once("message", (data: ThreadResult) => {
         resolve(data)
       });
-      // TODO invalid scene
     })
   }
 })
 
 threadPool.then((data: ThreadResult[]) => { })
 const data = await threadPool
-const confirmValidResult: ValidatorResult[] = []
-const forbidValidResult: ValidatorResult[] = []
+const validResult: ValidatorResult[] = []
 data.forEach(result => {
   result.validMsg.forEach(valid => {
-    const { validator } = valid
-    const target = validator.type === 'confirm' ? confirmValidResult : forbidValidResult
-    target.push({
+    validResult.push({
       validator: valid.validator.name,
       path: valid.path,
       msg: valid.msg as string
@@ -97,28 +84,18 @@ data.forEach(result => {
   })
 })
 
-if (!confirmValidResult.length && !forbidValidResult.length) {
+if (!validResult.length) {
   process.exit(0)
 }
 
-if (confirmValidResult.length) {
+const ignore = process.argv.includes('--no-verify')
+
+console.table(process.argv)
+if (validResult.length && !ignore) {
+  console.info(chalk.bgYellowBright("Your commit has been canceled. If you're sure you want to ignore this, please add `--no-verify` to your command."))
   console.info(
-    chalk.bgYellowBright(tipsText?.includesConfirmContent || Tips.includesConfirmContent)
+    chalk.yellowBright(tipsText?.includesConfirmContent || Tips.includesConfirmContent)
   );
-  console.table(confirmValidResult, ["validator", "path", "msg"]);
-}
-
-if (forbidValidResult.length) {
-  console.timeEnd();
-  console.info(chalk.bgRedBright(tipsText?.includesForbiddenContent || Tips.includesForbiddenContent));
-  console.table(forbidValidResult, ["validator", "path", "msg"]);
-  process.exit(1);
-}
-
-if (!forbidValidResult.length && confirmValidResult.length) {
-  console.timeEnd();
-  rl.question(tipsText?.confirmText || Tips.confirmText, (ans: string) => {
-    const answer = ans.toUpperCase() === 'Y'
-    process.exit(+!answer);
-  })
+  console.table(validResult, ["validator", "path", "msg"]);
+  process.exit(1)
 }
