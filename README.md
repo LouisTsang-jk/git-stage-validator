@@ -55,8 +55,6 @@ export interface ValidatorRule {
 ```
 tipsText: {
   includesConfirmContent: "",
-  includesForbiddenContent: "",
-  confirmText: ""
 }
 ```
 
