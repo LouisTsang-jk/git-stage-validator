@@ -27,8 +27,8 @@ if (!existsSync(filePath)) {
   writeFileSync(filePath, templateRaw, 'utf8')
 }
 
-const { default: customConfig } = await import(filePath)
-
+const filePathUrl = url.pathToFileURL(filePath);
+const { default: customConfig } = await import(filePathUrl.toString());
 
 const { validators: customValidators, tipsText } = customConfig
 
