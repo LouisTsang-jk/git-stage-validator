@@ -4,7 +4,7 @@ import path from 'path'
 import chalk from "chalk";
 import process from 'process';
 import { spawnSync } from "child_process";
-import { ThreadResult, ValidatorResult, ValidatorRule } from "./types.d";
+import { ThreadResult, ValidatorResult, ValidatorRule } from "./types";
 import { cpus } from "os";
 import { existsSync, readFileSync, writeFileSync } from 'fs'
 import { Worker } from "worker_threads";
